@@ -1,0 +1,20 @@
+---
+- hosts: all
+  gather_facts: no
+  vars_prompt:
+    - name: "variable_data"
+      prompt: "Enter the variable data for 'example_variable_name'"
+      default: "variable_data"
+
+  tasks:
+    - name: Generate vault variable, variable name - 'example_variable_name'
+      shell: "echo '{{ variable_data }}' | ansible-vault encrypt_string --vault-id ../use_secrets/pull_vault_password.sh --stdin-name 'example_variable_name'"
+      register: vault_output
+
+    - name: Copy data into read section for later use
+      copy:
+        content: "{{ vault_output.stdout }}"
+        dest: "../use_secrets/vault_data.yml"
+
+    - name: Print vault encrypted variable
+      debug: var=vault_output
